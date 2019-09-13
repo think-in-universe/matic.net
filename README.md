@@ -73,7 +73,7 @@ Developers are recommended start with [matic.js](https://docs.matic.network/gett
 
 ### Configuraiton
 
-Developers may refer to [Config.cs](./blob/master/src/MaticNetwork.Net/Config.cs) as an example of configuring testnet, contracts and accounts information.
+Developers may refer to [Config.cs](./src/MaticNetwork.Net/Config.cs) as an example of configuring testnet, contracts and accounts information.
 
 
 ## Documentation
