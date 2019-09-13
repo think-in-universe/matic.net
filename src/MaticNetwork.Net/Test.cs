@@ -6,19 +6,33 @@ using Nethereum.Hex.HexTypes;
 
 namespace MaticNetwork.Net
 {
-    class MainClass
+    class TestSuite
     {
         static void Main(string[] args)
         {
-            // GetAccountBalance().Wait();
-            // GetMappedTokenAddress().Wait();
+            // read
+
+            // BalanceOfEth().Wait();
             // BalanceOfERC20().Wait();
+            // GetMappedTokenAddress().Wait();
             // TokenOfOwnerByIndexERC721().Wait();
-            // DepositEthers().Wait();
+
+            // deposit
+
+            DepositEthers().Wait();
             // DepositERC20Token().Wait();
             // DepositERC721Token().Wait();
-            SafeDepositERC721Tokens().Wait();
-            //  Console.ReadLine();
+            // SafeDepositERC721Tokens().Wait();
+
+            // transfer
+
+            // TransferTokens().Wait();
+            // TransferERC721Tokens().Wait();
+            // TransferEthers().Wait();
+
+            // withdraw
+
+
         }
 
         static IMatic getMatic() {
@@ -27,10 +41,10 @@ namespace MaticNetwork.Net
             return matic;
         }
 
-        static async Task GetAccountBalance()
+        static async Task BalanceOfEth()
         {
-            var web3 = new Web3("https://mainnet.infura.io/v3/7238211010344719ad14a89db874158c");
-            var balance = await web3.Eth.GetBalance.SendRequestAsync("0xde0b295669a9fd93d5f28d9ec85e40f4cb697bae");
+            var web3 = new Web3(Config.MATIC_PROVIDER);
+            var balance = await web3.Eth.GetBalance.SendRequestAsync(Config.FROM_ADDRESS);
             Console.WriteLine($"Balance in Wei: {balance.Value}");
 
             var etherAmount = Web3.Convert.FromWei(balance.Value);
@@ -92,9 +106,47 @@ namespace MaticNetwork.Net
         static async Task DepositEthers()
         {
             var matic = getMatic();
-            var amount = "1000000000000000";
+            var amount = 1000000000000000; // 0.001 Ether
             await matic.DepositEthers(Config.FROM_ADDRESS, amount);
             Console.WriteLine($"DepositEthers finished");
+        }
+
+        static async Task TransferTokens() {
+            var matic = getMatic();
+            var from = Config.FROM_ADDRESS;
+            var to = Config.TO_ADDRESS;
+            var token = Config.MATIC_TEST_TOKEN;
+            var amount = 1000000000000000000;
+
+            var balance = await matic.BalanceOfERC20(from, token);
+            Console.WriteLine($"Test Token Balance is {balance}");
+
+            await matic.TransferTokens(from, token, to, amount);
+            Console.WriteLine($"TransferTokens finished");
+
+            balance = await matic.BalanceOfERC20(from, token);
+            Console.WriteLine($"Test Token Balance is {balance}");
+        }
+
+        static async Task TransferERC721Tokens() {
+            var matic = getMatic();
+            var from = Config.FROM_ADDRESS;
+            var to = Config.TO_ADDRESS;
+            var token = Config.MATIC_ERC721_TOKEN;
+            var tokenId = "1";
+            await matic.TransferERC721Tokens(from, token, to, tokenId);
+            Console.WriteLine($"TransferERC721Tokens finished");
+        }
+
+        static async Task TransferEthers()
+        {
+            var matic = getMatic();
+            var from = Config.FROM_ADDRESS;
+            var to = Config.TO_ADDRESS;
+            var amount = 1000000000000000;
+
+            await matic.TransferEthers(from, to, amount);
+            Console.WriteLine($"TransferEthers finished");
         }
 
     }

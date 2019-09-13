@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove=".\ArtifactsJson\ChildERC721.json" />
+    <None Remove="ArtifactsJson\ChildERC721.json" />
     <None Remove="ArtifactsJson\DepositManager.json" />
     <None Remove="ArtifactsJson\StandardToken.json" />
     <None Remove="ArtifactsJson\ChildERC20.json" />

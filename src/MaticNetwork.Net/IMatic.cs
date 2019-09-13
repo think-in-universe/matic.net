@@ -22,13 +22,13 @@ namespace MaticNetwork.Net
         Task SafeDepositERC721Tokens(string from, string token, string tokenId);
         Task ApproveERC721TokensForDeposit(string from, string token, string tokenId);
         Task DepositERC721Tokens(string from, string user, string token, string tokenId);
-        Task DepositEthers(string from, string value);
+        Task DepositEthers(string from, BigInteger value);
 
         // transfer
 
-        // matic.transferTokens()
-        // matic.transferERC721Tokens()
-        // matic.transferEthers()
+        Task<string> TransferTokens(string from, string token, string user, BigInteger amount, bool parent = false);
+        Task<string> TransferERC721Tokens(string from, string token, string user, string tokenId, bool parent = false);
+        Task<string> TransferEthers(string from, string to, BigInteger amount, bool parent = false, bool isCutomEth = false);
 
         // withdraw
 
