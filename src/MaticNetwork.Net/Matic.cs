@@ -1,13 +1,18 @@
 ﻿using System;
 using System.Numerics;
+using System.Text;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Net.Http;
+using System.Linq;
 using Nethereum.Web3;
 using Nethereum.Hex.HexTypes;
 using Nethereum.Contracts;
 using Nethereum.Web3.Accounts;
 using Nethereum.Util;
-
+using Nethereum.RPC.Eth.DTOs;
+using Nethereum.Hex.HexConvertors.Extensions;
+using Newtonsoft.Json.Linq;
 
 namespace MaticNetwork.Net
 {
@@ -16,7 +21,7 @@ namespace MaticNetwork.Net
 
         private string _maticProvider;
         private string _parentProvider;
-        private IWeb3 _web3;
+        private IWeb3 _childWeb3;
         private IWeb3 _parentWeb3;
         private string _syncerUrl;
         private string _watcherUrl;
@@ -42,11 +47,13 @@ namespace MaticNetwork.Net
         private string WithdrawManagerArtifacts;
         private string DepositManagerArtifacts;
 
+        private static readonly HttpClient webClient = new HttpClient();
+
         public Matic (string maticProvider, string parentProvider, string syncerUrl = null, string watcherUrl = null, string rootChainAddress = null, string maticWethAddress = null, string withdrawManagerAddress = null, string depositManagerAddress = null) {
 
             this._maticProvider = maticProvider;
             this._parentProvider = parentProvider;
-            this._web3 = new Web3(maticProvider);
+            this._childWeb3 = new Web3(maticProvider);
             this._parentWeb3 = new Web3(parentProvider);
 
             this._syncerUrl = syncerUrl;
@@ -67,9 +74,9 @@ namespace MaticNetwork.Net
             this._updateContracts();
         }
 
-        public IWeb3 Web3()
+        public IWeb3 ChildWeb3()
         {
-            return this._web3;
+            return this._childWeb3;
         }
 
         public IWeb3 ParentWeb3()
@@ -78,7 +85,7 @@ namespace MaticNetwork.Net
         }
 
         public void SetPrivateKey(string privateKey) {
-            this._web3 = new Web3(new Account(privateKey), this._maticProvider);
+            this._childWeb3 = new Web3(new Account(privateKey), this._maticProvider);
             this._parentWeb3 = new Web3(new Account(privateKey), this._parentProvider);
             this._updateContracts();
         }
@@ -117,7 +124,7 @@ namespace MaticNetwork.Net
         }
 
         public async Task<BigInteger> BalanceOfERC721(string address, string token, bool parent = false) {
-            var web3Object = parent ? this.ParentWeb3() : this.Web3();
+            var web3Object = parent ? this.ParentWeb3() : this.ChildWeb3();
             var contract = this._GetERC721TokenContract(token, web3Object);
             var balance = await contract.GetFunction("balanceOf").CallAsync<BigInteger>(address);
             return balance;
@@ -125,18 +132,20 @@ namespace MaticNetwork.Net
 
         public async Task<BigInteger> BalanceOfERC20(string address, string token, bool parent = false)
         {
-            var web3Object = parent ? this.ParentWeb3() : this.Web3();
+            var web3Object = parent ? this.ParentWeb3() : this.ChildWeb3();
             var contract = this._GetERC20TokenContract(token, web3Object);
             var balance = await contract.GetFunction("balanceOf").CallAsync<BigInteger>(address);
             return balance;
         }
 
         public async Task<string> TokenOfOwnerByIndexERC721(string address, string token, int index, bool parent = false) {
-            var web3Object = parent ? this.ParentWeb3() : this.Web3();
+            var web3Object = parent ? this.ParentWeb3() : this.ChildWeb3();
             var contract = this._GetERC721TokenContract(token, web3Object);
             var tokenId = await contract.GetFunction("tokenOfOwnerByIndex").CallAsync<string>(address, index);
             return tokenId;
         }
+
+        // deposit
 
         public async Task ApproveERC20TokensForDeposit(string from, string token, BigInteger amount) {
             // create token contract
@@ -176,15 +185,17 @@ namespace MaticNetwork.Net
             await this._SendTransaction(this.ParentWeb3(), function, from, new HexBigInteger(value));
         }
 
+        // transfer
+
         public async Task<string> TransferTokens(string from, string token, string user, BigInteger amount, bool parent = false) {
-            var web3Object = parent ? this.ParentWeb3() : this.Web3();
+            var web3Object = parent ? this.ParentWeb3() : this.ChildWeb3();
             var contract = this._GetERC20TokenContract(token, web3Object);
             var function = contract.GetFunction("transfer");
             return await this._SendTransaction(web3Object, function, from, null, user, amount);
         }
 
         public async Task<string> TransferERC721Tokens(string from, string token, string user, string tokenId, bool parent = false) {
-            var web3Object = parent ? this.ParentWeb3() : this.Web3();
+            var web3Object = parent ? this.ParentWeb3() : this.ChildWeb3();
             var contract = this._GetERC721TokenContract(token, web3Object);
             var function = contract.GetFunction("transferFrom");
             return await this._SendTransaction(web3Object, function, from, null, from, user, tokenId);
@@ -195,7 +206,7 @@ namespace MaticNetwork.Net
             if (!parent && !isCutomEth) {
                 return await this.TransferTokens(from, this._maticWethAddress, to, amount, parent);
             }
-            var web3Object = (!parent && isCutomEth) ? this.Web3() : this.ParentWeb3();
+            var web3Object = (!parent && isCutomEth) ? this.ChildWeb3() : this.ParentWeb3();
             // transfer Eth
             var amountDecimal  = Nethereum.Web3.Web3.Convert.FromWei(amount);
             var gasPrice = await web3Object.Eth.GasPrice.SendRequestAsync().ConfigureAwait(false);
@@ -207,15 +218,183 @@ namespace MaticNetwork.Net
             return receiptTxn.TransactionHash;
         }
 
+        // withdraw
+
+        public async Task<string> StartWithdraw(string from, string token, BigInteger amount) {
+            var web3Object = this.ChildWeb3();
+            var contract = this._GetERC20TokenContract(token, web3Object);
+            var function = contract.GetFunction("withdraw");
+            return await this._SendTransaction(web3Object, function, from, null, amount);
+        }
+        public async Task<string> StartERC721Withdraw(string from, string token, string tokenId) {
+            var web3Object = this.ChildWeb3();
+            var contract = this._GetERC721TokenContract(token, web3Object);
+            var function = contract.GetFunction("withdraw");
+            return await this._SendTransaction(web3Object, function, from, null, from,  tokenId);
+        }
+
+        public async Task<string> Withdraw(string from, string txId) {
+            // fetch trancation & receipt proof
+            var txProof = await this.GetTxProof(txId);
+            var receiptProof = await this.GetReceiptProof(txId);
+
+            // fetch header object & header proof
+            JToken header = null;
+            try {
+                header = await this.GetHeaderObject(txProof["blockNumber"].ToString());
+            } catch (Exception) {
+                // ignore error
+            }
+            // check if header block found
+            if (header == null){
+                throw new Exception($"No corresponding checkpoint / header block found for { txId}.");
+            }
+
+            var headerProof = await this.GetHeaderProof(txProof["blockNumber"].ToString(), header["start"].ToString(), header["end"].ToString());
+            // build proof
+            var hashes = headerProof["proof"].ToObject<List<string>>();
+            var proofBuffer = new byte[]{};
+            foreach (string hash in hashes) {
+                byte[] hashBuffer = hash.HexToByteArray();
+                proofBuffer = proofBuffer.Concat(hashBuffer).ToArray();
+            }
+            // Console.WriteLine($"proof buffer: {proofBuffer.ToHex(prefix: true)}");
+
+            // var path = receiptProof["path"].ToString();
+            // Console.WriteLine($"path: {path}");
+            // var bytes = Encoding.ASCII.GetBytes(path); // path.HexToByteArray(); //
+            // Console.WriteLine($"bytes: {Encoding.Default.GetString(bytes)}");
+            // var data = Nethereum.RLP.RLP.Decode(bytes).RLPData;
+            // Console.WriteLine($"data: {data}");
+            // var hex = data.ToHex(prefix: true);
+            // Console.WriteLine($"hex: {hex}");
+            // var bytes1 = Encoding.ASCII.GetBytes(receiptProof["path"].ToString());
+            // var bytes2 = receiptProof["path"].ToString().HexToByteArray();
+            // Console.WriteLine($"Hex: {Encoding.Default.GetString(bytes1)} v.s. {Encoding.Default.GetString(bytes2)}");
+
+            var web3Object = this.ParentWeb3();
+            var contract = this._withdrawManagerContract;
+            var function = contract.GetFunction("withdrawBurntTokens");
+            return await this._SendTransaction(web3Object, function, from, null,
+                header["number"].ToString(), // header block
+                proofBuffer, //.ToHex(prefix: true), // header proof
+                txProof["blockNumber"].ToString(), // block number
+                txProof["blockTimestamp"].ToString(), // block timestamp
+                txProof["root"].ToString().HexToByteArray(), // tx root
+                receiptProof["root"].ToString().HexToByteArray(), // receipt root
+                Nethereum.RLP.RLP.Decode(Encoding.ASCII.GetBytes(receiptProof["path"].ToString())/* .HexToByteArray() */).RLPData, //.ToHex(prefix: true), // key for trie (both tx and receipt)
+                txProof["value"].ToString().HexToByteArray(), // tx bytes
+                txProof["parentNodes"].ToString().HexToByteArray(), // tx proof nodes
+                receiptProof["value"].ToString().HexToByteArray(), // receipt bytes
+                receiptProof["parentNodes"].ToString().HexToByteArray() // reciept proof nodes
+            );
+        }
+
+        public async Task<string> ProcessExits(string from, string rootTokenAddress) {
+            var web3Object = this.ParentWeb3();
+            var contract = this._withdrawManagerContract;
+            var function = contract.GetFunction("processExits");
+            return await this._SendTransaction(web3Object, function, from, null, rootTokenAddress);
+        }
+
+        // transaction
+
+        public async Task<Transaction> GetTx(string txId) {
+            if (this._syncerUrl != null) {
+                try {
+                    var response = await this._ApiCall($"{this._syncerUrl}/tx/{txId}");
+                    if (response != null && response["tx"] != null) {
+                        return response["tx"].ToObject<Transaction>();
+                    }
+                } catch(Exception) {
+                    // ignore error
+                }
+            }
+            return await this.ChildWeb3().Eth.Transactions.GetTransactionByHash.SendRequestAsync(txId);
+        }
+
+        private async Task<JToken> GetTxProof(string txId)
+        {
+            try
+            {
+                var response = await this._ApiCall($"{this._syncerUrl}/tx/{txId}/proof");
+                if (response != null && response["proof"] != null)
+                {
+                    return response["proof"];
+                }
+            }
+            catch (Exception)
+            {
+                // ignore error
+            }
+            return null;
+        }
+
+        public async Task<TransactionReceipt> GetReceipt(string txId) {
+            if (this._syncerUrl != null) {
+                try {
+                    var response = await this._ApiCall($"{this._syncerUrl}/tx/{txId}/receipt");
+                    if (response != null && response["receipt"] != null) {
+                        return response["receipt"].ToObject<TransactionReceipt>();
+                    }
+                } catch (Exception) {
+                    // ignore error
+                }
+            }
+            return await this.ChildWeb3().Eth.Transactions.GetTransactionReceipt.SendRequestAsync(txId);
+        }
+
+        private async Task<JToken> GetReceiptProof(string txId) {
+            try {
+                var response = await this._ApiCall($"{this._syncerUrl}/tx/{txId}/receipt/proof");
+                if (response != null && response["proof"] != null) {
+                    return response["proof"];
+                }
+            } catch (Exception) {
+                // ignore error
+            }
+            return null;
+        }
+
+        public async Task<JToken> GetHeaderObject(string blockNumber) {
+            try {
+                var response = await this._ApiCall($"{this._watcherUrl}/header/included/{blockNumber}");
+                if (response != null) {
+                    return response;
+                }
+            } catch (Exception) {
+                // ignore error
+            }
+            return null;
+        }
+
+        public async Task<JToken> GetHeaderProof(string blockNumber, string start, string end)
+        {
+            try {
+                var response = await this._ApiCall($"{this._syncerUrl}/block/{blockNumber}/proof", new Dictionary<string, string> {
+                    { "start", start } ,
+                    { "end", end }
+                });
+                if (response != null && response["proof"] != null) {
+                    return response["proof"];
+                }
+            } catch (Exception) {
+                // ignore error
+            }
+            return null;
+        }
+
+
+        // utilities
         private async Task<string> _SendTransaction(IWeb3 web3Object, Function function, string from, HexBigInteger value, params object[] functionInput) {
             // get gas price
             var gasPrice = await web3Object.Eth.GasPrice.SendRequestAsync().ConfigureAwait(false);
             gasPrice = gasPrice.ToUlong() == 0 ? null : gasPrice;
-            Console.WriteLine($"gasPrice: {gasPrice}");
+            // Console.WriteLine($"gasPrice: {gasPrice}");
             // estimate gas
             // var gas = new HexBigInteger(170000);
             var gas = await function.EstimateGasAsync(from, null, value, functionInput);
-            Console.WriteLine($"gas: {gas}");
+            // Console.WriteLine($"gas: {gas}");
             // send transaction
             var receiptTxn = await function.SendTransactionAndWaitForReceiptAsync(from, gas, gasPrice, value, null, functionInput);
             // var hash = await function.SendTransactionAsync(from, gas, gasPrice, value, functionInput);
@@ -245,6 +424,35 @@ namespace MaticNetwork.Net
             }
             return this._tokenCache[_token];
         }
+
+       private async Task<JObject> _ApiCall(string url, Dictionary<string, string> queryParams = null, Dictionary<string, string> body = null) {
+            webClient.DefaultRequestHeaders.Add("Accept", "application/json");
+            webClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
+
+            if (queryParams != null) {
+                var content = new FormUrlEncodedContent(queryParams);
+                url = url + "?" + content.ReadAsStringAsync().Result;
+            }
+
+            Console.WriteLine($"send request: {url}");
+
+            string responseString = null;
+            if (body == null) {
+                responseString = await webClient.GetStringAsync(url);
+            } else {
+                var content = new FormUrlEncodedContent(body);
+                var response = await webClient.PostAsync(url, content);
+                responseString = await response.Content.ReadAsStringAsync();
+            }
+
+            if (responseString != null) {
+                // return JsonConvert.DeserializeObject(responseString);
+                return JObject.Parse(responseString);
+            } else {
+                return null;
+            }
+
+       }
 
     }
 }

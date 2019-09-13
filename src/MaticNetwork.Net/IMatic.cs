@@ -1,6 +1,8 @@
 ﻿using System.Numerics;
 using Nethereum.Hex.HexTypes;
 using System.Threading.Tasks;
+using Nethereum.RPC.Eth.DTOs;
+using Newtonsoft.Json.Linq;
 
 namespace MaticNetwork.Net
 {
@@ -10,10 +12,12 @@ namespace MaticNetwork.Net
 
         void SetPrivateKey(string privateKey);
 
+        // info
+
         Task<string> GetMappedTokenAddress(string tokenAddress);
-        Task<BigInteger> BalanceOfERC721(string address, string token, bool parent = false);
-        Task<BigInteger> BalanceOfERC20(string address, string token, bool parent = false);
         Task<string> TokenOfOwnerByIndexERC721(string address, string token, int index, bool parent = false);
+        Task<BigInteger> BalanceOfERC20(string address, string token, bool parent = false);
+        Task<BigInteger> BalanceOfERC721(string address, string token, bool parent = false);
 
         // deposit
 
@@ -32,15 +36,15 @@ namespace MaticNetwork.Net
 
         // withdraw
 
-        // matic.startWithdraw()
-        // matic.startERC721Withdraw()
-        // matic.withdraw()
-        // matic.processExits()
+        Task<string> StartWithdraw(string from, string token, BigInteger amount);
+        Task<string> StartERC721Withdraw(string from, string token, string tokenId);
+        Task<string> Withdraw(string from, string txId);
+        Task<string> ProcessExits(string from, string rootTokenAddress);
 
-        // read info
+        // transaction
 
-        // matic.getTx()
-        // matic.getReceipt()
-        // matic.getHeaderObject()
+        Task<Transaction> GetTx(string txId);
+        Task<TransactionReceipt> GetReceipt(string txId);
+        Task<JToken> GetHeaderObject(string blockNumber);
     }
 }

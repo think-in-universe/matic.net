@@ -15,6 +15,7 @@ namespace MaticNetwork.Net
         public static string MATICWETH_ADDRESS = "0x31074c34a757a4b9FC45169C58068F43B717b2D0"; // The corresponding wrapped ETH ERC20 contract address on the Matic chain
         public static string PRIVATE_KEY = "<paste your private key here>"; // A sample private key prefix with `0x`
         public static string FROM_ADDRESS = "<paste address belonging to private key here>";// Your address
+        public static string TO_ADDRESS = "<paste address to transfer tokens>";// receipent address
         public static string ROPSTEN_TEST_TOKEN = "0x70459e550254b9d3520a56ee95b78ee4f2dbd846"; // Contract for ERC20 in Ropsten
         public static string MATIC_TEST_TOKEN = "0xc82c13004c06E4c627cF2518612A55CE7a3Db699"; // Contract for ERC20 in Matic testnet
         public static string ROPSTEN_ERC721_TOKEN =  "0x07d799252cf13c01f602779b4dce24f4e5b08bbd"; // Contract for ERC721 in Ropsten testnet
