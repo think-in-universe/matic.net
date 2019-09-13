@@ -1,13 +1,20 @@
-﻿using System.Numerics;
+﻿using System;
+using System.Numerics;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Nethereum.Web3;
+using Nethereum.Hex.HexTypes;
 using Nethereum.Contracts;
+using Nethereum.Web3.Accounts;
+
 
 namespace MaticNetwork.Net
 {
     public class Matic: IMatic
     {
+
+        private string _maticProvider;
+        private string _parentProvider;
         private IWeb3 _web3;
         private IWeb3 _parentWeb3;
         private string _syncerUrl;
@@ -36,8 +43,9 @@ namespace MaticNetwork.Net
 
         public Matic (string maticProvider, string parentProvider, string syncerUrl = null, string watcherUrl = null, string rootChainAddress = null, string maticWethAddress = null, string withdrawManagerAddress = null, string depositManagerAddress = null) {
 
+            this._maticProvider = maticProvider;
+            this._parentProvider = parentProvider;
             this._web3 = new Web3(maticProvider);
-            // this._web3.matic = true
             this._parentWeb3 = new Web3(parentProvider);
 
             this._syncerUrl = syncerUrl;
@@ -55,28 +63,8 @@ namespace MaticNetwork.Net
             this.ChildERC20Artifacts = new ArtifactsReader("ChildERC20").GetABI();
             this.ChildERC721Artifacts = new ArtifactsReader("ChildERC721").GetABI();
 
-            // create rootchain contract
-            this._rootChainContract = this._parentWeb3.Eth.GetContract(
-                this.RootChainArtifacts,
-                this._rootChainAddress
-            );
-
-            // create withdraw manager contract
-            this._withdrawManagerContract = this._parentWeb3.Eth.GetContract(
-                this.WithdrawManagerArtifacts,
-                this._withdrawManagerAddress
-            );
-
-            // create deposit manager contract
-            this._depositManagerContract = this._parentWeb3.Eth.GetContract(
-                this.DepositManagerArtifacts,
-                this._depositManagerAddress
-            );
+            this._updateContracts();
         }
-
-        //
-        // Getters & setters
-        //
 
         public IWeb3 web3()
         {
@@ -86,6 +74,33 @@ namespace MaticNetwork.Net
         public IWeb3 parentWeb3()
         {
             return this._parentWeb3;
+        }
+
+        public void SetPrivateKey(string privateKey) {
+            var account = new Account(privateKey);
+            this._web3 = new Web3(account, this._maticProvider);
+            this._parentWeb3 = new Web3(account, this._parentProvider);
+            this._updateContracts();
+        }
+
+        private void _updateContracts() {
+            // create rootchain contract
+            this._rootChainContract = this.parentWeb3().Eth.GetContract(
+                this.RootChainArtifacts,
+                this._rootChainAddress
+            );
+
+            // create withdraw manager contract
+            this._withdrawManagerContract = this.parentWeb3().Eth.GetContract(
+                this.WithdrawManagerArtifacts,
+                this._withdrawManagerAddress
+            );
+
+            // create deposit manager contract
+            this._depositManagerContract = this.parentWeb3().Eth.GetContract(
+                this.DepositManagerArtifacts,
+                this._depositManagerAddress
+            );
         }
 
         public async Task<string> GetMappedTokenAddress(string address)
@@ -102,7 +117,7 @@ namespace MaticNetwork.Net
         }
 
         public async Task<BigInteger> BalanceOfERC721(string address, string token, bool parent = false) {
-            var web3Object = parent ? this._parentWeb3 : this._web3;
+            var web3Object = parent ? this.parentWeb3() : this.web3();
             var contract = this._GetERC721TokenContract(token, web3Object);
             var balance = await contract.GetFunction("balanceOf").CallAsync<BigInteger>(address);
             return balance;
@@ -110,27 +125,66 @@ namespace MaticNetwork.Net
 
         public async Task<BigInteger> BalanceOfERC20(string address, string token, bool parent = false)
         {
-            var web3Object = parent ? this._parentWeb3 : this._web3;
+            var web3Object = parent ? this.parentWeb3() : this.web3();
             var contract = this._GetERC20TokenContract(token, web3Object);
             var balance = await contract.GetFunction("balanceOf").CallAsync<BigInteger>(address);
             return balance;
         }
 
         public async Task<string> TokenOfOwnerByIndexERC721(string address, string token, int index, bool parent = false) {
-            var web3Object = parent ? this._parentWeb3 : this._web3;
+            var web3Object = parent ? this.parentWeb3() : this.web3();
             var contract = this._GetERC721TokenContract(token, web3Object);
             var tokenId = await contract.GetFunction("tokenOfOwnerByIndex").CallAsync<string>(address, index);
             return tokenId;
         }
 
-        public async void depositEther(string from, BigInteger value) {
-            var depositTx = this._rootChainContract.GetFunction("depositEthers");
-            // var _options = await this._fillOptions(
-            //     options,
-            //     depositTx,
-            //     this._parentWeb3
-            // )
-            await depositTx.SendTransactionAsync(from, value);
+        public async Task ApproveERC20TokensForDeposit(string from, string token, BigInteger amount) {
+            // create token contract
+            var _tokenContract = this.parentWeb3().Eth.GetContract(
+                this.StandardTokenArtifacts,
+                token
+            );
+            var approve = _tokenContract.GetFunction("approve");
+            await this._sendTransaction(this.parentWeb3(), approve, from, null, this._rootChainAddress, amount);
+        }
+
+        public async Task DepositERC20Tokens(string from, string user, string token, BigInteger amount) {
+            var deposit = this._rootChainContract.GetFunction("deposit");
+            await this._sendTransaction(this.parentWeb3(), deposit, from, null, token, user, amount);
+        }
+
+        public async Task SafeDepositERC721Tokens(string from, string token, string tokenId) {
+            var _tokenContract = this._GetERC721TokenContract(token, this.parentWeb3());
+            var safeTransferFrom = _tokenContract.GetFunction("safeTransferFrom");
+            await this._sendTransaction(this.parentWeb3(), safeTransferFrom, from, null, from, this._rootChainAddress, tokenId);
+        }
+
+        public async Task ApproveERC721TokensForDeposit(string from, string token, string tokenId) {
+            // create token contract
+            var _tokenContract = this._GetERC721TokenContract(token, this.parentWeb3());
+            var approve = _tokenContract.GetFunction("approve");
+            await this._sendTransaction(this.parentWeb3(), approve, from, null, this._rootChainAddress, tokenId);
+        }
+
+        public async Task DepositERC721Tokens(string from, string user, string token, string tokenId) {
+            var deposit = this._rootChainContract.GetFunction("depositERC721");
+            await this._sendTransaction(this.parentWeb3(), deposit, from, null, token, user, tokenId);
+        }
+
+        public async Task DepositEthers(string from, string value) {
+            var depositEthers = this._rootChainContract.GetFunction("depositEthers");
+            await this._sendTransaction(this.parentWeb3(), depositEthers, from, new HexBigInteger(value));
+        }
+
+        private async Task<string> _sendTransaction(IWeb3 web3Object, Function function, string from, HexBigInteger value, params object[] functionInput) {
+            var gasPrice = await web3Object.Eth.GasPrice.SendRequestAsync().ConfigureAwait(false);
+            Console.WriteLine($"gasPrice: {gasPrice}");
+            // var gas = new HexBigInteger(170000);
+            var gas = await function.EstimateGasAsync(from, null, value, functionInput);
+            Console.WriteLine($"gas: {gas}");
+            var receiptTxn = await function.SendTransactionAndWaitForReceiptAsync(from, gas, gasPrice, value, null, functionInput);
+            // var hash = await function.SendTransactionAsync(from, gas, gasPrice, value, functionInput);
+            return receiptTxn.TransactionHash;
         }
 
         private Contract _GetERC721TokenContract(string token, IWeb3 web3)
