@@ -6,7 +6,7 @@ Matic.Net makes it easy for developers, who may not be deeply familiar with smar
 
 This library will help developers to move assets from Ethereum chain to Matic chain, and withdraw from Matic to Ethereum using fraud proofs.
 
-Matic.Net implemented the APIs from [matic.js](https://github.com/maticnetwork/matic.js)
+Matic.Net follows the design principles of [matic.js](https://github.com/maticnetwork/matic.js), and implements all of `matic.js` APIs.
 
 Matic.Net also natively support Game Development with platforms such as Unity3D.
 
@@ -69,6 +69,32 @@ The flow for asset transfers on the Matic Network is as follows:
 ## Getting started
 
 Developers are recommended start with [matic.js](https://docs.matic.network/getting-started/) to learn about the major workflow and examples of working with Matic Network.
+
+### Install
+
+1. Install .Net SDK
+
+Matic.Net works with .Net Core or .Net Framework. You need to have the .Net SDK installed. For newbies we recommend .Net core.
+
+[Download and Install .Net SDK](https://www.microsoft.com/net/download)
+
+2. Craete an App
+
+Create a new project with .Net CLI as below, OR create a project in Visual Studio.
+
+```bash
+dotnet new console -o MaticExample
+cd MaticExample
+```
+
+3. Add Matic.Net package
+
+Add Matic.Net package reference by downloading the packages from NuGet with dotnet command (not ready in NuGet yet, will be added very soon)
+
+```bash
+dotnet add package MaticNetwork.Net
+dotnet restore
+```
 
 
 ### Configuraiton
