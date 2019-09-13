@@ -1,10 +1,16 @@
 # Matic.Net
 
-**Matic.Net** is a .NET Client for Matic Network, to supports dApps and innovation via .NET ecosystem including C#, C++, Visual Basic, etc.
+**Matic.Net** is a .NET Client for Matic Network (https://matic.network/), to supports dApps and innovation via .NET ecosystem including C#, C++, Visual Basic, etc.
 
-We also added the support for Unity3D integration.
+Matic.Net makes it easy for developers, who may not be deeply familiar with smart contract development, to interact with the various components of Matic Network.
 
-## Supported APIs
+This library will help developers to move assets from Ethereum chain to Matic chain, and withdraw from Matic to Ethereum using fraud proofs.
+
+Matic.Net implemented the APIs from [matic.js](https://github.com/maticnetwork/matic.js)
+
+Matic.Net also natively support Game Development with platforms such as Unity3D.
+
+## APIs
 
 The APIs in C# interface as an example.
 
@@ -50,7 +56,32 @@ The APIs in C# interface as an example.
 
 ```
 
-## Game Development with Unity3D
+## How it works?
+
+The flow for asset transfers on the Matic Network is as follows:
+
+- User deposits crypto assets in Matic contract on mainchain
+- Once deposited tokens get confirmed on the main chain, the corresponding tokens will get reflected on the Matic chain.
+- The user can now transfer tokens to anyone they want instantly with negligible fees. Matic chain has faster blocks (approximately ~ 1 second). That way, the transfer will be done almost instantly.
+- Once a user is ready, they can withdraw remaining tokens from the mainchain by establishing proof of remaining tokens on Root contract (contract deployed on Ethereum chain)
+
+
+## Getting started
+
+Developers are recommended start with [matic.js](https://docs.matic.network/getting-started/) to learn about the major workflow and examples of working with Matic Network.
+
+
+### Configuraiton
+
+Developers may refer to [Config.cs](./blob/master/src/MaticNetwork.Net/Config.cs) as an example of configuring testnet, contracts and accounts information.
+
+
+## Documentation
+
+To be added
+
+
+### Game development with Unity3D
 
 Matic.Net supports Game Development with platform which works well with .NET, such as Unity3D.
 
