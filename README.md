@@ -1,6 +1,6 @@
-# matic.net
+# Matic.Net
 
-**Matic.Net** is a .NET Client for Matic Network, that supports interaction via .NET projects including C#, C++, Visual Basic, etc.
+**Matic.Net** is a .NET Client for Matic Network, to supports dApps and innovation via .NET ecosystem including C#, C++, Visual Basic, etc.
 
 We also added the support for Unity3D integration.
 
@@ -50,13 +50,15 @@ The APIs in C# interface as an example.
 
 ```
 
-## Work with Unity3D
+## Game Development with Unity3D
+
+Matic.Net supports Game Development with platform which works well with .NET, such as Unity3D.
 
 
 
 ## Dependencies
 
-Matic.Net is built based on [Nethereum](https://github.com/Nethereum/Nethereum) to interact with Ethereum blockchain and Matic sidechain.
+Matic.Net is built based on [Nethereum](https://github.com/Nethereum/Nethereum) (an Ethereum .Net cross platform integration library) to interact with Ethereum blockchain and Matic sidechain.
 
 
 ## License
