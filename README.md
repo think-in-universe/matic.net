@@ -78,7 +78,7 @@ Matic.Net works with .Net Core or .Net Framework. You need to have the .Net SDK 
 
 [Download and Install .Net SDK](https://www.microsoft.com/net/download)
 
-2. Craete an App
+2. Create an App
 
 Create a new project with .Net CLI as below, OR create a project in Visual Studio.
 
@@ -95,6 +95,8 @@ Add Matic.Net package reference by downloading the packages from NuGet with dotn
 dotnet add package MaticNetwork.Net
 dotnet restore
 ```
+
+You can download the latest release of Matic.Net from [release page](https://github.com/think-in-universe/matic.net/releases) if you're not able to use NuGet.
 
 
 ### Configuraiton
