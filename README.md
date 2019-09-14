@@ -111,6 +111,7 @@ To be added
 
 Matic.Net supports Game Development with platform which works well with .NET, such as Unity3D.
 
+Look at [Matic Unity Starter Kit](https://github.com/think-in-universe/matic-unity-starter-kit) to learn more about how to develop a modern blockchain game with Unity3D and Matic.Net.
 
 
 ## Dependencies
