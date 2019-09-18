@@ -162,20 +162,20 @@ namespace MaticNetwork.Net
             await this._SendTransaction(this.ParentWeb3(), function, from, null, token, user, amount);
         }
 
-        public async Task SafeDepositERC721Tokens(string from, string token, string tokenId) {
+        public async Task SafeDepositERC721Tokens(string from, string token, BigInteger tokenId) {
             var _tokenContract = this._GetERC721TokenContract(token, this.ParentWeb3());
             var function = _tokenContract.GetFunction("safeTransferFrom");
             await this._SendTransaction(this.ParentWeb3(), function, from, null, from, this._rootChainAddress, tokenId);
         }
 
-        public async Task ApproveERC721TokensForDeposit(string from, string token, string tokenId) {
+        public async Task ApproveERC721TokensForDeposit(string from, string token, BigInteger tokenId) {
             // create token contract
             var _tokenContract = this._GetERC721TokenContract(token, this.ParentWeb3());
             var function = _tokenContract.GetFunction("approve");
             await this._SendTransaction(this.ParentWeb3(), function, from, null, this._rootChainAddress, tokenId);
         }
 
-        public async Task DepositERC721Tokens(string from, string user, string token, string tokenId) {
+        public async Task DepositERC721Tokens(string from, string user, string token, BigInteger tokenId) {
             var function = this._rootChainContract.GetFunction("depositERC721");
             await this._SendTransaction(this.ParentWeb3(), function, from, null, token, user, tokenId);
         }
@@ -226,11 +226,11 @@ namespace MaticNetwork.Net
             var function = contract.GetFunction("withdraw");
             return await this._SendTransaction(web3Object, function, from, null, amount);
         }
-        public async Task<string> StartERC721Withdraw(string from, string token, string tokenId) {
+        public async Task<string> StartERC721Withdraw(string from, string token, BigInteger tokenId) {
             var web3Object = this.ChildWeb3();
             var contract = this._GetERC721TokenContract(token, web3Object);
             var function = contract.GetFunction("withdraw");
-            return await this._SendTransaction(web3Object, function, from, null, from,  tokenId);
+            return await this._SendTransaction(web3Object, function, from, null, tokenId);
         }
 
         public async Task<string> Withdraw(string from, string txId) {

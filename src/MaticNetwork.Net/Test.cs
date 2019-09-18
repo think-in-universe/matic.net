@@ -14,7 +14,7 @@ namespace MaticNetwork.Net
 
             // BalanceOfEth().Wait();
             // BalanceOfERC20().Wait();
-            BalanceOfERC721().Wait();
+            // BalanceOfERC721().Wait();
             // GetMappedTokenAddress().Wait();
             // TokenOfOwnerByIndexERC721().Wait();
 
@@ -34,7 +34,7 @@ namespace MaticNetwork.Net
             // withdraw
 
             // StartWithdraw().Wait();
-            // StartERC721Withdraw().Wait();
+            StartERC721Withdraw().Wait();
             // StartEthersWithdraw().Wait();
             // ConfirmWithdraw().Wait();
             // ProcessExitERC20().Wait();
@@ -101,7 +101,7 @@ namespace MaticNetwork.Net
             var matic = GetMatic();
             var from = Config.FROM_ADDRESS;
             var token = Config.ROPSTEN_ERC721_TOKEN;
-            var tokenId = "1";
+            var tokenId = 1001;
             await matic.ApproveERC721TokensForDeposit(from, token, tokenId);
             Console.WriteLine($"ApproveERC721TokensForDeposit finished");
             await matic.DepositERC721Tokens(from, from, token, tokenId);
@@ -112,7 +112,7 @@ namespace MaticNetwork.Net
             var matic = GetMatic();
             var from = Config.FROM_ADDRESS;
             var token = Config.ROPSTEN_ERC721_TOKEN;
-            var tokenId = "72";
+            var tokenId = 1004;
             await matic.SafeDepositERC721Tokens(from, token, tokenId);
             Console.WriteLine($"SafeDepositERC721Tokens finished");
         }
@@ -187,7 +187,7 @@ namespace MaticNetwork.Net
             var matic = GetMatic();
             var from = Config.FROM_ADDRESS;
             var token = Config.MATIC_ERC721_TOKEN;
-            var tokenId = "1";
+            var tokenId = 1002;
             var hash = await matic.StartERC721Withdraw(from, token, tokenId);
             Console.WriteLine($"StartERC721Withdraw finished: {hash}");
         }

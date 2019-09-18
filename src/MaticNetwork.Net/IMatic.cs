@@ -23,9 +23,9 @@ namespace MaticNetwork.Net
 
         Task ApproveERC20TokensForDeposit(string from, string token, BigInteger amount);
         Task DepositERC20Tokens(string from, string user, string token, BigInteger amount);
-        Task SafeDepositERC721Tokens(string from, string token, string tokenId);
-        Task ApproveERC721TokensForDeposit(string from, string token, string tokenId);
-        Task DepositERC721Tokens(string from, string user, string token, string tokenId);
+        Task SafeDepositERC721Tokens(string from, string token, BigInteger tokenId);
+        Task ApproveERC721TokensForDeposit(string from, string token, BigInteger tokenId);
+        Task DepositERC721Tokens(string from, string user, string token, BigInteger tokenId);
         Task DepositEthers(string from, BigInteger value);
 
         // transfer
@@ -37,7 +37,7 @@ namespace MaticNetwork.Net
         // withdraw
 
         Task<string> StartWithdraw(string from, string token, BigInteger amount);
-        Task<string> StartERC721Withdraw(string from, string token, string tokenId);
+        Task<string> StartERC721Withdraw(string from, string token, BigInteger tokenId);
         Task<string> Withdraw(string from, string txId);
         Task<string> ProcessExits(string from, string rootTokenAddress);
 
