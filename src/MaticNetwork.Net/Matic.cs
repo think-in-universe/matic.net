@@ -194,7 +194,7 @@ namespace MaticNetwork.Net
             return await this._SendTransaction(web3Object, function, from, null, user, amount);
         }
 
-        public async Task<string> TransferERC721Tokens(string from, string token, string user, string tokenId, bool parent = false) {
+        public async Task<string> TransferERC721Tokens(string from, string token, string user, BigInteger tokenId, bool parent = false) {
             var web3Object = parent ? this.ParentWeb3() : this.ChildWeb3();
             var contract = this._GetERC721TokenContract(token, web3Object);
             var function = contract.GetFunction("transferFrom");

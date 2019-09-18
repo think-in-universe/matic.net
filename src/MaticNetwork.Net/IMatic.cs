@@ -31,7 +31,7 @@ namespace MaticNetwork.Net
         // transfer
 
         Task<string> TransferTokens(string from, string token, string user, BigInteger amount, bool parent = false);
-        Task<string> TransferERC721Tokens(string from, string token, string user, string tokenId, bool parent = false);
+        Task<string> TransferERC721Tokens(string from, string token, string user, BigInteger tokenId, bool parent = false);
         Task<string> TransferEthers(string from, string to, BigInteger amount, bool parent = false, bool isCutomEth = false);
 
         // withdraw

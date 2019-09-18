@@ -14,9 +14,9 @@ namespace MaticNetwork.Net
 
             // BalanceOfEth().Wait();
             // BalanceOfERC20().Wait();
-            // BalanceOfERC721().Wait();
+            BalanceOfERC721().Wait();
             // GetMappedTokenAddress().Wait();
-            TokenOfOwnerByIndexERC721().Wait();
+            // TokenOfOwnerByIndexERC721().Wait();
 
             // deposit
 
@@ -149,7 +149,7 @@ namespace MaticNetwork.Net
             var from = Config.FROM_ADDRESS;
             var to = Config.TO_ADDRESS;
             var token = Config.MATIC_ERC721_TOKEN;
-            var tokenId = "1";
+            var tokenId = 1001;
             await matic.TransferERC721Tokens(from, token, to, tokenId);
             Console.WriteLine($"TransferERC721Tokens finished");
         }
