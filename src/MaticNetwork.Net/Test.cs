@@ -14,7 +14,7 @@ namespace MaticNetwork.Net
 
             // BalanceOfEth().Wait();
             // BalanceOfERC20().Wait();
-            // BalanceOfERC721().Wait();
+            BalanceOfERC721().Wait();
             // GetMappedTokenAddress().Wait();
             // TokenOfOwnerByIndexERC721().Wait();
 
@@ -34,7 +34,7 @@ namespace MaticNetwork.Net
             // withdraw
 
             // StartWithdraw().Wait();
-            StartERC721Withdraw().Wait();
+            // StartERC721Withdraw().Wait();
             // StartEthersWithdraw().Wait();
             // ConfirmWithdraw().Wait();
             // ProcessExitERC20().Wait();
@@ -72,14 +72,20 @@ namespace MaticNetwork.Net
         static async Task BalanceOfERC721() {
             var matic = GetMatic();
             var balance = await matic.BalanceOfERC721(Config.FROM_ADDRESS, Config.MATIC_ERC721_TOKEN);
-            Console.WriteLine($"BalanceOfERC721 is {balance}");
+            Console.WriteLine($"BalanceOfERC721 of matic chain is {balance}");
+
+            balance = await matic.BalanceOfERC721(Config.FROM_ADDRESS, Config.ROPSTEN_ERC721_TOKEN, parent: true);
+            Console.WriteLine($"BalanceOfERC721 of parent chain is {balance}");
         }
 
         static async Task TokenOfOwnerByIndexERC721()
         {
             var matic = GetMatic();
             var tokenId = await matic.TokenOfOwnerByIndexERC721(Config.FROM_ADDRESS, Config.MATIC_ERC721_TOKEN, 0, false);
-            Console.WriteLine($"TokenOfOwnerByIndexERC721 is {tokenId}");
+            Console.WriteLine($"TokenOfOwnerByIndexERC721 of matic is {tokenId}");
+
+            tokenId = await matic.TokenOfOwnerByIndexERC721(Config.FROM_ADDRESS, Config.ROPSTEN_ERC721_TOKEN, 0, true);
+            Console.WriteLine($"TokenOfOwnerByIndexERC721 of parent chain is {tokenId}");
         }
 
         // deposit
@@ -101,7 +107,7 @@ namespace MaticNetwork.Net
             var matic = GetMatic();
             var from = Config.FROM_ADDRESS;
             var token = Config.ROPSTEN_ERC721_TOKEN;
-            var tokenId = 1001;
+            var tokenId = 696;
             await matic.ApproveERC721TokensForDeposit(from, token, tokenId);
             Console.WriteLine($"ApproveERC721TokensForDeposit finished");
             await matic.DepositERC721Tokens(from, from, token, tokenId);
