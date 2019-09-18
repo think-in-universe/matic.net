@@ -260,18 +260,6 @@ namespace MaticNetwork.Net
             }
             // Console.WriteLine($"proof buffer: {proofBuffer.ToHex(prefix: true)}");
 
-            // var path = receiptProof["path"].ToString();
-            // Console.WriteLine($"path: {path}");
-            // var bytes = Encoding.ASCII.GetBytes(path); // path.HexToByteArray(); //
-            // Console.WriteLine($"bytes: {Encoding.Default.GetString(bytes)}");
-            // var data = Nethereum.RLP.RLP.Decode(bytes).RLPData;
-            // Console.WriteLine($"data: {data}");
-            // var hex = data.ToHex(prefix: true);
-            // Console.WriteLine($"hex: {hex}");
-            // var bytes1 = Encoding.ASCII.GetBytes(receiptProof["path"].ToString());
-            // var bytes2 = receiptProof["path"].ToString().HexToByteArray();
-            // Console.WriteLine($"Hex: {Encoding.Default.GetString(bytes1)} v.s. {Encoding.Default.GetString(bytes2)}");
-
             var web3Object = this.ParentWeb3();
             var contract = this._withdrawManagerContract;
             var function = contract.GetFunction("withdrawBurntTokens");
@@ -282,7 +270,7 @@ namespace MaticNetwork.Net
                 txProof["blockTimestamp"].ToString(), // block timestamp
                 txProof["root"].ToString().HexToByteArray(), // tx root
                 receiptProof["root"].ToString().HexToByteArray(), // receipt root
-                Nethereum.RLP.RLP.Decode(Encoding.ASCII.GetBytes(receiptProof["path"].ToString())/* .HexToByteArray() */).RLPData, //.ToHex(prefix: true), // key for trie (both tx and receipt)
+                Nethereum.RLP.RLP.EncodeElement(receiptProof["path"].ToString().HexToByteArray()), // .ToHex(prefix: true); // key for trie (both tx and receipt)
                 txProof["value"].ToString().HexToByteArray(), // tx bytes
                 txProof["parentNodes"].ToString().HexToByteArray(), // tx proof nodes
                 receiptProof["value"].ToString().HexToByteArray(), // receipt bytes

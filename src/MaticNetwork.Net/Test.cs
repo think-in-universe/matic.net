@@ -13,14 +13,15 @@ namespace MaticNetwork.Net
             // read
 
             // BalanceOfEth().Wait();
-            // BalanceOfERC20().Wait();
+            BalanceOfERC20().Wait();
+            BalanceOfERC721().Wait();
             // GetMappedTokenAddress().Wait();
             // TokenOfOwnerByIndexERC721().Wait();
 
             // deposit
 
             // DepositEthers().Wait();
-            DepositERC20Token().Wait();
+            // DepositERC20Token().Wait();
             // DepositERC721Token().Wait();
             // SafeDepositERC721Tokens().Wait();
 
@@ -66,6 +67,12 @@ namespace MaticNetwork.Net
             var matic = GetMatic();
             var balance = await matic.BalanceOfERC20(Config.FROM_ADDRESS, Config.MATIC_TEST_TOKEN);
             Console.WriteLine($"BalanceOfERC20 is {balance}");
+        }
+
+        static async Task BalanceOfERC721() {
+            var matic = GetMatic();
+            var balance = await matic.BalanceOfERC721(Config.FROM_ADDRESS, Config.MATIC_ERC721_TOKEN);
+            Console.WriteLine($"BalanceOfERC721 is {balance}");
         }
 
         static async Task TokenOfOwnerByIndexERC721()
@@ -200,7 +207,10 @@ namespace MaticNetwork.Net
         {
             var matic = GetMatic();
             var from = Config.FROM_ADDRESS;
-            var txId = "transaction" // initiate-withdraw-ERC20
+            var txId = "0xba2808123d31caf13a7eee0a5bed1e5861ca7df1815c99ad617eba65df194e5f";
+            // var txId = "0xf3869b30ee3a2ea4f7e04fde757a2072d417db5ed131f2df7a4f727d96ff107e";
+            // var txId = "0x3b1cc6fd194688b8787686f7e0b9538adf69c1617197d98e97b0732c230e303e";
+            // "0xc40f9d7c4e6175e32880e3ee4815fc3bb7052b3397c57f52cbf3aef7fa8b0e83"; // initiate-withdraw-ERC20
 
             await matic.Withdraw(from, txId);
             Console.WriteLine($"ConfirmWithdraw finished");
