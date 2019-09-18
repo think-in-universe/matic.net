@@ -15,7 +15,7 @@ namespace MaticNetwork.Net
         // info
 
         Task<string> GetMappedTokenAddress(string tokenAddress);
-        Task<string> TokenOfOwnerByIndexERC721(string address, string token, int index, bool parent = false);
+        Task<BigInteger> TokenOfOwnerByIndexERC721(string address, string token, BigInteger index, bool parent = false);
         Task<BigInteger> BalanceOfERC20(string address, string token, bool parent = false);
         Task<BigInteger> BalanceOfERC721(string address, string token, bool parent = false);
 

@@ -13,10 +13,10 @@ namespace MaticNetwork.Net
             // read
 
             // BalanceOfEth().Wait();
-            BalanceOfERC20().Wait();
-            BalanceOfERC721().Wait();
+            // BalanceOfERC20().Wait();
+            // BalanceOfERC721().Wait();
             // GetMappedTokenAddress().Wait();
-            // TokenOfOwnerByIndexERC721().Wait();
+            TokenOfOwnerByIndexERC721().Wait();
 
             // deposit
 
@@ -78,7 +78,7 @@ namespace MaticNetwork.Net
         static async Task TokenOfOwnerByIndexERC721()
         {
             var matic = GetMatic();
-            var tokenId = await matic.TokenOfOwnerByIndexERC721(Config.FROM_ADDRESS, Config.ROPSTEN_ERC721_TOKEN, 0);
+            var tokenId = await matic.TokenOfOwnerByIndexERC721(Config.FROM_ADDRESS, Config.MATIC_ERC721_TOKEN, 0, false);
             Console.WriteLine($"TokenOfOwnerByIndexERC721 is {tokenId}");
         }
 

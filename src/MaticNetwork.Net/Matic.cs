@@ -138,10 +138,10 @@ namespace MaticNetwork.Net
             return balance;
         }
 
-        public async Task<string> TokenOfOwnerByIndexERC721(string address, string token, int index, bool parent = false) {
+        public async Task<BigInteger> TokenOfOwnerByIndexERC721(string address, string token, BigInteger index, bool parent = false) {
             var web3Object = parent ? this.ParentWeb3() : this.ChildWeb3();
             var contract = this._GetERC721TokenContract(token, web3Object);
-            var tokenId = await contract.GetFunction("tokenOfOwnerByIndex").CallAsync<string>(address, index);
+            var tokenId = await contract.GetFunction("tokenOfOwnerByIndex").CallAsync<BigInteger>(address, index);
             return tokenId;
         }
 
