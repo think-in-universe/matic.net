@@ -1,53 +1,26 @@
 ﻿using System;
+using Xunit;
 using System.Numerics;
 using System.Threading.Tasks;
 using Nethereum.Web3;
 using Nethereum.Hex.HexTypes;
+using MaticNetwork.Net;
 
-namespace MaticNetwork.Net
+namespace MaticNetwork.Net.IntegrationTest
 {
-    class TestSuite
+    public class MaticAPITest
     {
-        static void Main(string[] args)
+
+        public IMatic GetMatic()
         {
-            // read
-
-            // BalanceOfEth().Wait();
-            // BalanceOfERC20().Wait();
-            BalanceOfERC721().Wait();
-            // GetMappedTokenAddress().Wait();
-            // TokenOfOwnerByIndexERC721().Wait();
-
-            // deposit
-
-            // DepositEthers().Wait();
-            // DepositERC20Token().Wait();
-            // DepositERC721Token().Wait();
-            // SafeDepositERC721Tokens().Wait();
-
-            // transfer
-
-            // TransferTokens().Wait();
-            // TransferERC721Tokens().Wait();
-            // TransferEthers().Wait();
-
-            // withdraw
-
-            // StartWithdraw().Wait();
-            // StartERC721Withdraw().Wait();
-            // StartEthersWithdraw().Wait();
-            // ConfirmWithdraw().Wait();
-            // ProcessExitERC20().Wait();
-
-        }
-
-        static IMatic GetMatic() {
             var matic = new Matic(Config.MATIC_PROVIDER, Config.PARENT_PROVIDER, Config.SYNCER_URL, Config.WATCHER_URL, Config.ROOTCHAIN_ADDRESS, Config.MATICWETH_ADDRESS, Config.WITHDRAWMANAGER_ADDRESS, Config.DEPOSITMANAGER_ADDRESS);
             matic.SetPrivateKey(Config.PRIVATE_KEY);
             return matic;
         }
 
-        static async Task BalanceOfEth()
+        // read info
+
+        async Task BalanceOfEth()
         {
             var web3 = new Web3(Config.MATIC_PROVIDER);
             var balance = await web3.Eth.GetBalance.SendRequestAsync(Config.FROM_ADDRESS);
@@ -57,28 +30,31 @@ namespace MaticNetwork.Net
             Console.WriteLine($"Balance in Ether: {etherAmount}");
         }
 
-        static async Task GetMappedTokenAddress() {
+        [Fact]
+        public async Task GetMappedTokenAddress() {
             var matic = GetMatic();
             var mappedAddress = await matic.GetMappedTokenAddress(Config.ROPSTEN_TEST_TOKEN);
             Console.WriteLine($"The mapped address is {mappedAddress}");
         }
 
-        static async Task BalanceOfERC20() {
+        [Fact]
+        public async Task BalanceOfERC20() {
             var matic = GetMatic();
             var balance = await matic.BalanceOfERC20(Config.FROM_ADDRESS, Config.MATIC_TEST_TOKEN);
             Console.WriteLine($"BalanceOfERC20 is {balance}");
         }
 
-        static async Task BalanceOfERC721() {
+        [Fact]
+        public async Task BalanceOfERC721() {
             var matic = GetMatic();
             var balance = await matic.BalanceOfERC721(Config.FROM_ADDRESS, Config.MATIC_ERC721_TOKEN);
             Console.WriteLine($"BalanceOfERC721 of matic chain is {balance}");
 
             balance = await matic.BalanceOfERC721(Config.FROM_ADDRESS, Config.ROPSTEN_ERC721_TOKEN, parent: true);
-            Console.WriteLine($"BalanceOfERC721 of parent chain is {balance}");
+            Console.WriteLine($"BalanceOfERC721chain is {balance}");
         }
 
-        static async Task TokenOfOwnerByIndexERC721()
+        public async Task TokenOfOwnerByIndexERC721()
         {
             var matic = GetMatic();
             var tokenId = await matic.TokenOfOwnerByIndexERC721(Config.FROM_ADDRESS, Config.MATIC_ERC721_TOKEN, 0, false);
@@ -90,7 +66,7 @@ namespace MaticNetwork.Net
 
         // deposit
 
-        static async Task DepositERC20Token()
+        public async Task DepositERC20Token()
         {
             var matic = GetMatic();
             var from = Config.FROM_ADDRESS;
@@ -102,7 +78,7 @@ namespace MaticNetwork.Net
             Console.WriteLine($"DepositERC20Tokens finished");
         }
 
-        static async Task DepositERC721Token()
+        public async Task DepositERC721Token()
         {
             var matic = GetMatic();
             var from = Config.FROM_ADDRESS;
@@ -114,7 +90,7 @@ namespace MaticNetwork.Net
             Console.WriteLine($"DepositERC721Token finished");
         }
 
-        static async Task SafeDepositERC721Tokens() {
+        public async Task SafeDepositERC721Tokens() {
             var matic = GetMatic();
             var from = Config.FROM_ADDRESS;
             var token = Config.ROPSTEN_ERC721_TOKEN;
@@ -123,7 +99,7 @@ namespace MaticNetwork.Net
             Console.WriteLine($"SafeDepositERC721Tokens finished");
         }
 
-        static async Task DepositEthers()
+        public async Task DepositEthers()
         {
             var matic = GetMatic();
             var amount = 1000000000000000; // 0.001 Ether
@@ -133,7 +109,7 @@ namespace MaticNetwork.Net
 
         // transfer
 
-        static async Task TransferTokens() {
+        public async Task TransferTokens() {
             var matic = GetMatic();
             var from = Config.FROM_ADDRESS;
             var to = Config.TO_ADDRESS;
@@ -150,7 +126,7 @@ namespace MaticNetwork.Net
             Console.WriteLine($"Test Token Balance is {balance}");
         }
 
-        static async Task TransferERC721Tokens() {
+        public async Task TransferERC721Tokens() {
             var matic = GetMatic();
             var from = Config.FROM_ADDRESS;
             var to = Config.TO_ADDRESS;
@@ -160,7 +136,7 @@ namespace MaticNetwork.Net
             Console.WriteLine($"TransferERC721Tokens finished");
         }
 
-        static async Task TransferEthers() {
+        public async Task TransferEthers() {
             var matic = GetMatic();
             var from = Config.FROM_ADDRESS;
             var to = Config.TO_ADDRESS;
@@ -172,7 +148,7 @@ namespace MaticNetwork.Net
 
         // withdraw
 
-        static async Task StartWithdraw() {
+        public async Task StartWithdraw() {
             var matic = GetMatic();
             var from = Config.FROM_ADDRESS;
             var to = Config.TO_ADDRESS;
@@ -189,7 +165,7 @@ namespace MaticNetwork.Net
             Console.WriteLine($"Test Token Balance is {balance}");
         }
 
-        static async Task StartERC721Withdraw() {
+        public async Task StartERC721Withdraw() {
             var matic = GetMatic();
             var from = Config.FROM_ADDRESS;
             var token = Config.MATIC_ERC721_TOKEN;
@@ -198,7 +174,7 @@ namespace MaticNetwork.Net
             Console.WriteLine($"StartERC721Withdraw finished: {hash}");
         }
 
-        static async Task StartEthersWithdraw()
+        public async Task StartEthersWithdraw()
         {
             var matic = GetMatic();
             var from = Config.FROM_ADDRESS;
@@ -209,7 +185,7 @@ namespace MaticNetwork.Net
             Console.WriteLine($"StartEthersWithdraw finished: {hash}");
         }
 
-        static async Task ConfirmWithdraw()
+        public async Task ConfirmWithdraw()
         {
             var matic = GetMatic();
             var from = Config.FROM_ADDRESS;
@@ -222,7 +198,7 @@ namespace MaticNetwork.Net
             Console.WriteLine($"ConfirmWithdraw finished");
         }
 
-        static async Task ProcessExitERC20()
+        public async Task ProcessExitERC20()
         {
             var matic = GetMatic();
             var from = Config.FROM_ADDRESS;

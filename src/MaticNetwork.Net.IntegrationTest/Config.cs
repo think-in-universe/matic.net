@@ -1,6 +1,6 @@
 
 
-namespace MaticNetwork.Net
+namespace MaticNetwork.Net.IntegrationTest
 {
     public static class Config
     {
