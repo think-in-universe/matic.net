@@ -16,7 +16,7 @@ namespace MaticNetwork.Net
     // }
 
     public ArtifactsReader(string filename) {
-      var path = $"matic.net.ArtifactsJson.{filename}.json";
+      var path = $"Matic.Net.ArtifactsJson.{filename}.json";
       this.jObject = this.ReadJson(path);
     }
 
