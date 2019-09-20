@@ -101,7 +101,7 @@ You can download the latest release of Matic.Net from [release page](https://git
 
 ### Configuraiton
 
-Developers may refer to [Config.cs](./src/MaticNetwork.Net/Config.cs) as an example of configuring testnet, contracts and accounts information.
+Developers may refer to [Config.cs](./src/MaticNetwork.Net.IntegrationTest/Config.cs) as an example of configuring testnet, contracts and accounts information.
 
 
 ## Documentation
